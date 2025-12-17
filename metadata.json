@@ -1,0 +1,4 @@
+{
+  "name": "NewsGuard AI",
+  "description": "A multimodal fake news detection system using ISMAF (PHEME/WEIBO) models with interpretability visualization."
+}
