@@ -1,15 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, ShieldCheck, Loader2, Sparkles, BrainCircuit, Info, ChevronRight, Binary } from 'lucide-react';
 import { FileUpload } from './components/FileUpload';
 import { ResultDashboard } from './components/ResultDashboard';
 import { DetectionResult } from './types';
-import { detectFakeNews } from './services/detectionService';
+import { detectFakeNews, checkBackendHealth } from './services/detectionService';
 
 const App: React.FC = () => {
   const [textInput, setTextInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DetectionResult | null>(null);
+  const [backendOnline, setBackendOnline] = useState<boolean>(false);
+
+  // Check backend health status periodically
+  useEffect(() => {
+    const checkHealth = async () => {
+      const isOnline = await checkBackendHealth();
+      setBackendOnline(isOnline);
+    };
+
+    // Initial check
+    checkHealth();
+
+    // Set up interval to check every 5 seconds
+    const interval = setInterval(checkHealth, 5000);
+
+    // Clean up interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAnalyze = async () => {
     if (!textInput.trim()) {
@@ -65,9 +83,13 @@ const App: React.FC = () => {
           </div>
           
           <div className="hidden md:flex items-center gap-6">
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-500 px-3 py-1 bg-slate-100/50 rounded-md border border-slate-200/50">
-               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-               System Online
+            <div className={`flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-md border ${
+              backendOnline 
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                : 'bg-rose-50 text-rose-700 border-rose-200'
+            }`}>
+               <span className={`w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+               {backendOnline ? 'System Online' : 'System Offline'}
             </div>
             <div className="h-4 w-[1px] bg-slate-300"></div>
             <div className="flex items-center gap-2 text-xs text-slate-600">
@@ -111,6 +133,7 @@ const App: React.FC = () => {
                     onChange={(e) => setTextInput(e.target.value)}
                     placeholder="在此输入新闻正文..."
                     className="w-full h-48 p-4 rounded-lg border border-slate-200 bg-slate-50 text-sm leading-relaxed placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white outline-none resize-none transition-all duration-200 font-mono text-xs"
+                    disabled={!backendOnline}
                   />
                   <div className="flex justify-end">
                      <span className="text-[10px] text-slate-400">{textInput.length} chars</span>
@@ -122,16 +145,16 @@ const App: React.FC = () => {
                       <label className="text-xs font-semibold text-slate-700">图像附件</label>
                       <span className="text-[10px] text-rose-500 bg-rose-50 px-1.5 rounded font-semibold">必填</span>
                    </div>
-                   <FileUpload onFileSelect={setSelectedFile} selectedFile={selectedFile} />
+                   <FileUpload onFileSelect={setSelectedFile} selectedFile={selectedFile} disabled={!backendOnline} />
                 </div>
               </div>
               
               <div className="p-5 bg-slate-50/30 border-t border-slate-100">
                 <button
                   onClick={handleAnalyze}
-                  disabled={loading || !textInput || !selectedFile}
+                  disabled={loading || !textInput || !selectedFile || !backendOnline}
                   className={`w-full py-3 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 
-                    ${loading || !textInput || !selectedFile
+                    ${loading || !textInput || !selectedFile || !backendOnline
                       ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
                       : 'bg-slate-900 text-white hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:translate-y-0.5'
                     }`}
@@ -148,6 +171,12 @@ const App: React.FC = () => {
                     </>
                   )}
                 </button>
+                
+                {!backendOnline && (
+                  <div className="mt-3 text-xs text-rose-600 text-center">
+                    ⚠️ 后端服务未启动，请先启动后端服务再进行分析
+                  </div>
+                )}
               </div>
             </div>
             

@@ -155,6 +155,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "online"}
 
 img_pipeline = transforms.Compose([
     transforms.Resize(256),
