@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DetectionResult } from '../types';
 import { TextHighlighter } from './TextHighlighter';
-import { AlertTriangle, CheckCircle, Eye, EyeOff, Activity, Layers, ScanFace, GitCompare, HelpCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Eye, EyeOff, Activity, Layers, ScanFace, GitCompare, HelpCircle, Copy, Check } from 'lucide-react';
 
 interface ResultDashboardProps {
   result: DetectionResult;
@@ -10,6 +10,7 @@ interface ResultDashboardProps {
 
 export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, originalImage }) => {
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const [imgUrl, setImgUrl] = useState<string>("");
 
   useEffect(() => {
@@ -19,6 +20,39 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
       return () => URL.revokeObjectURL(url);
     }
   }, [originalImage]);
+
+  const copyHeatmapToClipboard = async () => {
+    if (!result.explainability.imageCamOverlay) return;
+
+    try {
+      // 将base64数据转换为blob
+      const base64Data = result.explainability.imageCamOverlay.split(',')[1]; // 移除"data:image/png;base64,"前缀
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'image/png' });
+
+      // 复制图片到剪贴板
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // 2秒后重置状态
+    } catch (err) {
+      console.error('复制失败:', err);
+      // 如果clipboard.write不支持，回退到复制base64文本
+      try {
+        await navigator.clipboard.writeText(result.explainability.imageCamOverlay);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      } catch (textErr) {
+        console.error('文本复制也失败:', textErr);
+      }
+    }
+  };
 
   const isFake = result.isFake;
   const isReal = !isFake;
@@ -188,30 +222,56 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
           {/* 右侧：图像 + Grad-CAM */}
           <div className="p-4 flex flex-col items-center justify-center bg-slate-50 h-full">
             {imgUrl ? (
-              <div className="relative w-full max-w-[520px] rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-900">
-                <div className="relative w-full" style={{ paddingTop: '60%' }}>
-                  <img
-                    src={imgUrl}
-                    className="absolute inset-0 w-full h-full object-contain z-0"
-                    alt="Original"
-                  />
-                  {result.explainability.imageCamOverlay && (
+              <div className="relative w-full max-w-[520px]">
+                {/* 主图像容器 */}
+                <div className="relative rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-900">
+                  <div className="relative w-full" style={{ paddingTop: '60%' }}>
                     <img
-                      src={result.explainability.imageCamOverlay}
-                      className={`absolute inset-0 w-full h-full object-contain z-10 transition-opacity duration-500 mix-blend-screen ${
-                        showHeatmap ? 'opacity-100' : 'opacity-0'
-                      }`}
-                      alt="Heatmap"
+                      src={imgUrl}
+                      className="absolute inset-0 w-full h-full object-contain z-0"
+                      alt="Original"
                     />
-                  )}
-                </div>
-                <div className="flex justify-between items-center px-3 py-2 bg-slate-900/90">
-                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${showHeatmap && result.explainability.imageCamOverlay ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300'}`}>
-                    {showHeatmap && result.explainability.imageCamOverlay ? 'Grad-CAM ON' : 'Original'}
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    ResNet50
-                  </span>
+                    {result.explainability.imageCamOverlay && (
+                      <img
+                        src={result.explainability.imageCamOverlay}
+                        className={`absolute inset-0 w-full h-full object-contain z-10 transition-opacity duration-300 ${
+                          showHeatmap ? 'opacity-100' : 'opacity-0'
+                        }`}
+                        alt="Heatmap"
+                      />
+                    )}
+                  </div>
+
+                  {/* 状态栏 */}
+                  <div className="flex justify-between items-center px-3 py-2 bg-slate-900/90">
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors ${
+                      showHeatmap && result.explainability.imageCamOverlay
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-800 text-slate-300'
+                    }`}>
+                      {showHeatmap && result.explainability.imageCamOverlay ? 'Grad-CAM ON' : 'Original'}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-slate-400">ResNet50</span>
+                      {result.explainability.imageCamOverlay && (
+                        <button
+                          onClick={copyHeatmapToClipboard}
+                          className={`p-1 rounded transition-colors flex items-center gap-1 ${
+                            copySuccess
+                              ? 'bg-green-600 text-white'
+                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          }`}
+                          title="复制热力图图片到剪贴板"
+                        >
+                          {copySuccess ? (
+                            <Check size={10} />
+                          ) : (
+                            <Copy size={10} />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (

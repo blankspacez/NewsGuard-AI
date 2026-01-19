@@ -4,6 +4,7 @@ import re
 import pickle
 import base64
 import math
+import numpy as np
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 
@@ -276,15 +277,23 @@ async def predict(
                     # dim=0 (列求和): 代表该 Token 被其他 Token 关注的程度 (Centrality/Importance)
                     token_scores = attn_sub.sum(dim=0)  # (t_len,)
 
-                    # 5. 【关键修改】使用 Min-Max 归一化，强制拉开差距
-                    t_min = token_scores.min()
-                    t_max = token_scores.max()
+                    # 5. 【改进】使用更鲁棒的归一化方法：百分位裁剪 + Softmax
+                    # 先进行百分位裁剪，避免异常值影响
+                    scores_np = token_scores.cpu().numpy()
+                    p_low = np.percentile(scores_np, 5)
+                    p_high = np.percentile(scores_np, 95)
+                    scores_clipped = np.clip(scores_np, p_low, p_high)
 
-                    if t_max - t_min > 1e-6:  # 防止除以0
-                        # 结果分布在 [0, 1] 之间
-                        token_scores = (token_scores - t_min) / (t_max - t_min)
+                    # 归一化到合理范围，然后应用 softmax 增强对比度
+                    if p_high - p_low > 1e-6:
+                        scores_normalized = (scores_clipped - p_low) / (p_high - p_low + 1e-8)
+                        # 应用 temperature scaling，拉开差距
+                        temperature = 2.0  # 较小的 temperature 值会增强差异
+                        scores_softmax = torch.softmax(torch.tensor(scores_normalized / temperature), dim=0)
+                        token_scores = scores_softmax
                     else:
-                        token_scores = torch.zeros_like(token_scores)
+                        # 如果所有分数几乎相同，给予均匀分布
+                        token_scores = torch.ones_like(token_scores) / len(token_scores)
 
                     # 6. 额外的平滑处理 (可选):
                     # 如果希望稍微平滑一点，不想让 0 分看起来完全透明，可以加一个基底
