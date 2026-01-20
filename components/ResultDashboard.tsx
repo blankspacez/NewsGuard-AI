@@ -216,7 +216,7 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 h-full">
           {/* 左侧：文本注意力 */}
           <div className="border-r border-slate-200 max-h-[420px]">
-            <TextHighlighter tokens={result.explainability.textAttention} isFake={isFake} />
+            <TextHighlighter tokens={result.explainability.textAttention} isFake={isFake} originalText={result.originalText} />
           </div>
 
           {/* 右侧：图像 + Grad-CAM */}

@@ -48,7 +48,7 @@ const App: React.FC = () => {
         text: textInput,
         image: selectedFile
       });
-      setResult(data);
+      setResult({ ...data, originalText: textInput });
     } catch (error) {
       console.error("Detection failed", error);
       alert("分析失败，请确保后端服务已启动。");
