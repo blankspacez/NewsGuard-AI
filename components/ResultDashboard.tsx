@@ -59,58 +59,58 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
-      
+
       {/* 1. Top Verdict Panel */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row">
-         
-         {/* Verdict Status Color Bar */}
-         <div className={`w-full md:w-2 ${isFake ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
 
-         <div className="p-8 flex-1 flex flex-col md:flex-row items-center md:items-start gap-8">
-            {/* Icon */}
-            <div className={`p-4 rounded-full flex-shrink-0 ${isFake ? 'bg-rose-50' : 'bg-emerald-50'}`}>
-               {isFake ? (
-                 <AlertTriangle className="w-8 h-8 text-rose-500" />
-               ) : (
-                 <CheckCircle className="w-8 h-8 text-emerald-500" />
-               )}
-            </div>
+        {/* Verdict Status Color Bar */}
+        <div className={`w-full md:w-2 ${isFake ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
 
-            {/* Text Info */}
-            <div className="flex-1 text-center md:text-left">
-               <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
-                 Detection Verdict
-               </div>
-               <h2 className="text-3xl font-bold text-slate-900 mb-2">
-                 {isFake ? '虚假新闻 (Fake News)' : '真实新闻 (Real News)'}
-               </h2>
-               <p className="text-sm text-slate-500 leading-relaxed max-w-lg">
-                 {isFake 
-                   ? '经过 ISMAF 模型综合分析，该内容在文本语义和图像特征上表现出高度的虚假特征，建议谨慎传播。' 
-                   : '经过 ISMAF 模型综合分析，该内容特征与真实报道模式高度吻合，未发现明显的篡改或造假痕迹。'}
-               </p>
-            </div>
+        <div className="p-8 flex-1 flex flex-col md:flex-row items-center md:items-start gap-8">
+          {/* Icon */}
+          <div className={`p-4 rounded-full flex-shrink-0 ${isFake ? 'bg-rose-50' : 'bg-emerald-50'}`}>
+            {isFake ? (
+              <AlertTriangle className="w-8 h-8 text-rose-500" />
+            ) : (
+              <CheckCircle className="w-8 h-8 text-emerald-500" />
+            )}
+          </div>
 
-            {/* Score Visualization */}
-            <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100 min-w-[140px]">
-               <div className="relative flex items-center justify-center mb-2">
-                  <svg className="w-20 h-20 transform -rotate-90">
-                     <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-slate-200" />
-                     <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent" 
-                        strokeDasharray={36 * 2 * Math.PI}
-                        strokeDashoffset={36 * 2 * Math.PI - (result.confidence / 100) * 36 * 2 * Math.PI}
-                        className={isFake ? 'text-rose-500' : 'text-emerald-500'}
-                     />
-                  </svg>
-                  <span className={`absolute text-xl font-bold font-mono ${isFake ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    {Math.round(result.confidence)}%
-                  </span>
-               </div>
-               <span className="text-[10px] font-semibold text-slate-500 uppercase">置信度评分</span>
+          {/* Text Info */}
+          <div className="flex-1 text-center md:text-left">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+              Detection Verdict
             </div>
-         </div>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
+              {isFake ? '谣言 (Rumor)' : '非谣言 (Non-Rumor)'}
+            </h2>
+            <p className="text-sm text-slate-500 leading-relaxed max-w-lg">
+              {isFake
+                ? '经过 ISMAF 模型综合分析，该内容在文本语义和图像特征上表现出高度的虚假特征，建议谨慎传播。'
+                : '经过 ISMAF 模型综合分析，该内容特征与真实报道模式高度吻合，未发现明显的篡改或造假痕迹。'}
+            </p>
+          </div>
+
+          {/* Score Visualization */}
+          <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100 min-w-[140px]">
+            <div className="relative flex items-center justify-center mb-2">
+              <svg className="w-20 h-20 transform -rotate-90">
+                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-slate-200" />
+                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent"
+                  strokeDasharray={36 * 2 * Math.PI}
+                  strokeDashoffset={36 * 2 * Math.PI - (result.confidence / 100) * 36 * 2 * Math.PI}
+                  className={isFake ? 'text-rose-500' : 'text-emerald-500'}
+                />
+              </svg>
+              <span className={`absolute text-xl font-bold font-mono ${isFake ? 'text-rose-600' : 'text-emerald-600'}`}>
+                {Math.round(result.confidence)}%
+              </span>
+            </div>
+            <span className="text-[10px] font-semibold text-slate-500 uppercase">置信度评分</span>
+          </div>
+        </div>
       </div>
-      
+
       {/* 2. Metadata Bar */}
       <div className="flex gap-4 overflow-x-auto pb-2">
         <div className="px-4 py-2 bg-white rounded-lg border border-slate-200 text-xs font-mono text-slate-600 shadow-sm whitespace-nowrap">
@@ -141,7 +141,7 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
                   </span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-2 mb-2">
-                  <div 
+                  <div
                     className="bg-blue-500 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${((result.consistency.cosineSimilarity + 1) / 2) * 100}%` }}
                   />
@@ -196,11 +196,10 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
           {result.explainability.imageCamOverlay ? (
             <button
               onClick={() => setShowHeatmap(!showHeatmap)}
-              className={`text-[10px] flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-                showHeatmap 
-                  ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
+              className={`text-[10px] flex items-center gap-1 px-2 py-1 rounded transition-colors ${showHeatmap
+                  ? 'bg-emerald-500 text-white hover:bg-emerald-600'
                   : 'border border-slate-500 hover:bg-slate-800'
-              }`}
+                }`}
             >
               {showHeatmap ? (
                 <><EyeOff size={10} /> 隐藏热力图</>
@@ -234,9 +233,8 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
                     {result.explainability.imageCamOverlay && (
                       <img
                         src={result.explainability.imageCamOverlay}
-                        className={`absolute inset-0 w-full h-full object-contain z-10 transition-opacity duration-300 ${
-                          showHeatmap ? 'opacity-100' : 'opacity-0'
-                        }`}
+                        className={`absolute inset-0 w-full h-full object-contain z-10 transition-opacity duration-300 ${showHeatmap ? 'opacity-100' : 'opacity-0'
+                          }`}
                         alt="Heatmap"
                       />
                     )}
@@ -244,11 +242,10 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
 
                   {/* 状态栏 */}
                   <div className="flex justify-between items-center px-3 py-2 bg-slate-900/90">
-                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors ${
-                      showHeatmap && result.explainability.imageCamOverlay
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors ${showHeatmap && result.explainability.imageCamOverlay
                         ? 'bg-emerald-600 text-white'
                         : 'bg-slate-800 text-slate-300'
-                    }`}>
+                      }`}>
                       {showHeatmap && result.explainability.imageCamOverlay ? 'Grad-CAM ON' : 'Original'}
                     </span>
                     <div className="flex items-center gap-2">
@@ -256,11 +253,10 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({ result, origin
                       {result.explainability.imageCamOverlay && (
                         <button
                           onClick={copyHeatmapToClipboard}
-                          className={`p-1 rounded transition-colors flex items-center gap-1 ${
-                            copySuccess
+                          className={`p-1 rounded transition-colors flex items-center gap-1 ${copySuccess
                               ? 'bg-green-600 text-white'
                               : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                          }`}
+                            }`}
                           title="复制热力图图片到剪贴板"
                         >
                           {copySuccess ? (
