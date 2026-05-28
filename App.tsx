@@ -72,14 +72,9 @@ const App: React.FC = () => {
             <div className="bg-slate-900 p-2 rounded-lg shadow-lg shadow-slate-900/20">
               <Binary className="w-5 h-5 text-white" />
             </div>
-            <div className="flex flex-col">
-              <h1 className="font-bold text-lg tracking-tight text-slate-900 leading-tight">
-                Rumor Detection <span className="font-light text-slate-500">System</span>
-              </h1>
-              <span className="text-[10px] font-medium tracking-widest text-slate-500 uppercase">
-                多模态谣言检测系统
-              </span>
-            </div>
+            <h1 className="font-bold text-lg tracking-tight text-slate-900">
+              谣言检测系统
+            </h1>
           </div>
 
           <div className="hidden md:flex items-center gap-6">
@@ -88,12 +83,12 @@ const App: React.FC = () => {
               : 'bg-rose-50 text-rose-700 border-rose-200'
               }`}>
               <span className={`w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-              {backendOnline ? 'System Online' : 'System Offline'}
+              {backendOnline ? '在线' : '离线'}
             </div>
             <div className="h-4 w-[1px] bg-slate-300"></div>
             <div className="flex items-center gap-2 text-xs text-slate-600">
               <BrainCircuit size={14} className="text-indigo-600" />
-              <span className="font-mono">Model: ISMAF-Student</span>
+              <span className="font-mono">模型: ISMAF-Student</span>
             </div>
           </div>
         </div>
